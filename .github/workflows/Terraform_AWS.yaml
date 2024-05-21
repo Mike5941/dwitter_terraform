@@ -1,0 +1,63 @@
+name: "Provision AWS Resources using Terraform"
+
+on:
+  workflow_dispatch:
+    inputs:
+      resource:
+        type: choice
+        description: Choose the resource
+        options:
+        - ./staging/eks
+      action:
+        description: 'Terraform Action to Perform'
+        type: choice
+        options:
+        - terraform_apply
+        - terraform_destroy
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform:
+    name: "Provision VPC and EKS Cluster"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: GitHubActions
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: latest
+
+      - name: Terraform Init
+        run: terraform init -migrate-state
+        working-directory: ${{ github.event.inputs.resource }}
+
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: ${{ github.event.inputs.resource }}
+
+      - name: Terraform Format
+        run: terraform fmt
+        working-directory: ${{ github.event.inputs.resource }}
+
+      - name: Terraform Apply
+        if: ${{ github.event.inputs.action == 'terraform_apply' }}
+        run: terraform apply -auto-approve
+        working-directory: ${{ github.event.inputs.resource }}
+
+      - name: Terraform Destroy
+        if: ${{ github.event.inputs.action == 'terraform_destroy' }}
+        run: terraform destroy -auto-approve
+        working-directory: ${{ github.event.inputs.resource }}
+
