@@ -15,10 +15,6 @@ on:
         - terraform_apply
         - terraform_destroy
 
-permissions:
-  id-token: write
-  contents: read
-
 jobs:
   terraform:
     name: "Provision VPC and EKS Cluster"
@@ -28,8 +24,8 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          role-session-name: GitHubActions
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -60,3 +56,4 @@ jobs:
         if: ${{ github.event.inputs.action == 'terraform_destroy' }}
         run: terraform destroy -auto-approve
         working-directory: ${{ github.event.inputs.resource }}
+
