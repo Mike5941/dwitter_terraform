@@ -6,17 +6,15 @@ data "aws_iam_policy_document" "eks_assume_role" {
 
     principals {
       type        = "Service"
-      identifiers = ["ec2.amazonaws.com"]
+      identifiers = ["eks.amazonaws.com"]
     }
   }
 }
 
 resource "aws_iam_role" "eks" {
   name = "${local.env}-${local.eks_name}-eks-cluster"
-
   assume_role_policy = data.aws_iam_policy_document.eks_assume_role.json
 }
-
 
 resource "aws_iam_role_policy_attachment" "eks" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
@@ -46,7 +44,6 @@ resource "aws_eks_cluster" "eks" {
 
   depends_on = [aws_iam_role_policy_attachment.eks]
 }
-
 
 
 # locals {

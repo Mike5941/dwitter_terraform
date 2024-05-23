@@ -20,7 +20,6 @@ resource "aws_iam_role_policy_attachment" "amazon_eks_worker_node_policy" {
   role   = aws_iam_role.nodes.name
 }
 
-// Pod의 보조 IP를 관리하는 정책
 resource "aws_iam_role_policy_attachment" "amazon_eks_cni_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
   role       = aws_iam_role.nodes.name
