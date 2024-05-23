@@ -1,20 +1,18 @@
+data "aws_iam_policy_document" "nodes_assume_role" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
+  }
+}
+
 resource "aws_iam_role" "nodes" {
   name = "${local.env}-${local.eks_name}-eks-nodes"
-
-  assume_role_policy = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "ec2.amazonaws.com
-      }
-    }
-  ]
-}
-POLICY
+  assume_role_policy = data.aws_iam_policy_document.nodes_assume_role.json
 }
 
 resource "aws_iam_role_policy_attachment" "amazon_eks_worker_node_policy" {

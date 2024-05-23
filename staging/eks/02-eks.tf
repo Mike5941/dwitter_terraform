@@ -1,22 +1,22 @@
 # EKS 서비스만 이 역할을 수행할 수 있도록 하는 ROLE
+data "aws_iam_policy_document" "eks_assume_role" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
+  }
+}
+
 resource "aws_iam_role" "eks" {
   name = "${local.env}-${local.eks_name}-eks-cluster"
 
-  assume_role_policy = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "eks.amazonaws.com"
-      }
-    }
-  ]
+  assume_role_policy = data.aws_iam_policy_document.eks_assume_role.json
 }
-POLICY
-}
+
 
 resource "aws_iam_role_policy_attachment" "eks" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
